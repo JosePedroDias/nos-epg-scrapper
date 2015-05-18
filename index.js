@@ -1,5 +1,6 @@
 var scrap = require('scrap');
 var request = require('request');
+var moment = require('moment');
 
 
 
@@ -37,8 +38,9 @@ function getChannel(chNr, cb) {
         var days = {};
 
         $('.programs-day-list').each(function(i, pdl) {
-            var id = $(pdl).attr('id');
-            id = id.substring(3);
+            //var id = $(pdl).attr('id');
+            //id = id.substring(3);
+            var id = moment().add(i, 'days').format('YYYY-MM-DD');
 
             var progs = $(this).find('li a').map(function(i, l) {
                 var t = $(l).text();
