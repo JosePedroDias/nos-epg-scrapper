@@ -1,5 +1,3 @@
-var fs = require('fs');
-
 var scrap = require('scrap');
 var request = require('request');
 
@@ -7,17 +5,6 @@ var request = require('request');
 
 var prefix = 'http://www.nos.pt/particulares/televisao/guia-tv/Pages/channel.aspx';
 var prefix2 = 'http://www.nos.pt/_layouts/Armstrong/ApplicationPages/EPGGetProgramsAndDetails.aspx/GetProgramDetails';
-
-
-
-var log2 = function(err, o) { if (err) { return console.error(err); } console.log(o); };
-
-var saveAsJSON = function(fileName) {
-    return function(err, o) {
-        if (err) { return console.error(err); }
-        fs.writeFile(fileName, JSON.stringify(o, null, '  '), log2);
-    }
-};
 
 
 
@@ -29,17 +16,24 @@ function getChannels(cb) {
             var t = $(this).text().trim();
             var a = t.indexOf('  ');
             var b = t.lastIndexOf(' ');
-            return [t.substring(0, a-2), t.substring(b+1)];
+            return {
+                name: t.substring(0, a-2),
+                number: t.substring(b+1)
+            };
         }));
     });
 }
+
+
 
 function getChannel(chNr, cb) {
     scrap(prefix + '?channel=' + chNr, function (err, $) {
         if (err) { return cb(err); }
 
+        var img = $('#channel-logo img');
         var name = $('#channel-name').text().trim();
-        var logo = $('#channel-logo img').attr('src');
+        var logo = img.attr('src');
+        var acronym = img.attr('alt');
         var days = {};
 
         $('.programs-day-list').each(function(i, pdl) {
@@ -50,22 +44,24 @@ function getChannel(chNr, cb) {
                 var t = $(l).text();
                 var m = (/(\d\d\:\d\d)/m).exec(t);
                 return {
-                    i: $(l).attr('id'),
-                    c: $(l).attr('class'),
-                    t: $(l).attr('title'),
-                    s: m[1],
-                    e: t.substr(t.length - 6, 5)
+                    id: $(l).attr('id'),
+                    genre: $(l).attr('class'),
+                    title: $(l).attr('title'),
+                    startT: m[1],
+                    endT: t.substr(t.length - 6, 5)
                 };
             });
 
             days[id] = progs;
         });
 
-        cb(null, {name:name, logo:logo, progs:days});
+        cb(null, {name:name, logo:logo, acronym:acronym, progs:days});
     });
 }
 
-function getProgram(pO, cb) {
+
+
+function getProgramLowLevel(pO, cb) {
     request(
         {
             uri: prefix2,
@@ -92,25 +88,20 @@ function getProgram(pO, cb) {
     })
 }
 
+function getProgram(chAcronym, progO, cb) {
+    getProgramLowLevel({
+        programId: progO.id,
+        channelAcronym: chAcronym,
+        hour: '0',
+        startHour: progO.startT,
+        endHour: progO.endT
+    }, cb);
+}
 
 
-//getChannels(log2);
-//getChannels(saveAsJSON('channels.json'));
 
-
-
-//getChannel('232', log2); // +tvi
-//getChannel('232', saveAsJSON('232.json'));
-
-
-
-var p51316 = {
-    programId: '51316',
-    channelAcronym: 'MAISTVISD',
-    hour: '0',
-    startHour: '23:45',
-    endHour: '00:30'
+module.exports = {
+    getChannels: getChannels,
+    getChannel: getChannel,
+    getProgram: getProgram
 };
-
-//getProgram(p51316, log2);
-getProgram(p51316, saveAsJSON('p51316.json'));
