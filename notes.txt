@@ -1,0 +1,61 @@
+http://www.nos.pt/particulares/televisao/guia-tv/Pages/channel.aspx
+
+lis = document.querySelectorAll('.dropdown-ord li')
+lis = Array.prototype.slice.call(lis)
+lis = lis.map(function(l) { var t = l.querySelector('a').innerText.trim(); var a = t.indexOf('  '); var b = t.lastIndexOf(' '); return [t.substring(0, a-1), t.substring(b+1)]; })
+
+lis[11] => ["+TVI", "232"]
+
+-->
+
+http://www.nos.pt/particulares/televisao/guia-tv/Pages/channel.aspx?channel=232&selDay=day18&timewarpEnabled=false
+
+
+document.querySelector('#channel-logo img').src
+document.querySelector('#channel-name').innerText.trim()
+
+arr = document.querySelectorAll('.programs-day-list li a')
+arr = Array.prototype.slice.call(arr)
+arr2 =arr.map(function(l) { return {i:l.id, c:l.className, t:l.title, tt:l.innerText}; })
+
+// {i: "51288", c: "entretenimento", t: "The Block All Stars", tt: "The Block All Stars↵00:00 - 00:30"}
+
+
+curl 'http://www.nos.pt/_layouts/Armstrong/ApplicationPages/EPGGetProgramsAndDetails.aspx/GetProgramDetails' -H 'Pragma: no-cache' -H 'Origin: http://www.nos.pt' -H 'Accept-Encoding: gzip, deflate' -H 'Accept-Language: en-US,en;q=0.8,pt-PT;q=0.6,pt;q=0.4,es;q=0.2,fr;q=0.2,nb;q=0.2' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.152 Safari/537.36' -H 'Content-Type: application/json; charset=UTF-8' -H 'Accept: application/json, text/javascript, */*; q=0.01' -H 'Cache-Control: no-cache' -H 'X-Requested-With: XMLHttpRequest' -H 'Cookie: byside_webcare_tuid=91osk3ouv6y2wz8c4t87s21j823orx8fdsi4nn802ju574dkkt; _ga=GA1.2.134934526.1431042390; _dc_gtm_UA-50840327-1=1' -H 'Connection: keep-alive' -H 'Referer: http://www.nos.pt/particulares/televisao/guia-tv/Pages/channel.aspx?channel=232&selDay=day18&timewarpEnabled=false' --data-binary $'{\'programId\':\'51288\',\'channelAcronym\':\'MAISTVISD\',\'hour\':\'0\',\'startHour\':\'\n                                                                00:00\n                                                                \',\'endHour\':\'\n                                                                00:30\'}' --compressed
+
+
+curl
+'http://www.nos.pt/_layouts/Armstrong/ApplicationPages/EPGGetProgramsAndDetails.aspx/GetProgramDetails'
+-H 'Pragma: no-cache'
+-H 'Origin: http://www.nos.pt'
+-H 'Accept-Encoding: gzip, deflate'
+-H 'Accept-Language: en-US,en;q=0.8,pt-PT;q=0.6,pt;q=0.4,es;q=0.2,fr;q=0.2,nb;q=0.2'
+-H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.152 Safari/537.36'
+-H 'Content-Type: application/json; charset=UTF-8'
+-H 'Accept: application/json, text/javascript, */*; q=0.01'
+-H 'Cache-Control: no-cache'
+-H 'X-Requested-With: XMLHttpRequest'
+-H 'Cookie: byside_webcare_tuid=91osk3ouv6y2wz8c4t87s21j823orx8fdsi4nn802ju574dkkt; _ga=GA1.2.134934526.1431042390; _dc_gtm_UA-50840327-1=1'
+-H 'Connection: keep-alive'
+-H 'Referer: http://www.nos.pt/particulares/televisao/guia-tv/Pages/channel.aspx?channel=232&selDay=day18&timewarpEnabled=false'
+--data-binary $'{\'programId\':\'51288\',\'channelAcronym\':\'MAISTVISD\',\'hour\':\'0\',\'startHour\':\'\n                                                                00:00\n                                                                \',\'endHour\':\'\n                                                                00:30\'}' --compressed
+
+
+
+{"d":"The Block All Stars_#|$_Quatro casais participantes de edições anteriores regressam à competição para fazer justiça e tentar vencer o prémio final. Só que os desafios serão maiores e a pressão mais difícil de suportar._#|$_399175_resized_352x198.jpg_#|$_\n                                                                00:00\n                                                                _#|$_\n                                                                00:30_#|$_+TVI_#|$_2015-05-18T00:00:00+01:00_#|$_2015-05-18T00:30:00+01:00_#|$_false"}
+
+o.d.split('_#|$_')
+
+[ 'The Block All Stars',
+  'Quatro casais participantes de edições anteriores regressam à competição para fazer justiça e tentar vencer o prémio final. Só que os desafios serão maiores e a pressão mais difícil de suportar.',
+  '399175_resized_352x198.jpg',
+  '\n                                                                00:00\n                                                                ',
+  '\n                                                                00:30',
+  '+TVI',
+  '2015-05-18T00:00:00+01:00',
+  '2015-05-18T00:30:00+01:00',
+  'false' ]
+
+
+http://images.nos.pt/399175_resized_352x198.jpg
+
