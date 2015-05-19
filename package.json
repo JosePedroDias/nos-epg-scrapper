@@ -1,12 +1,25 @@
 {
   "name": "nos-epg-scrapper",
   "version": "1.0.0",
-  "description": "",
-  "main": "scrap.js",
+  "description": "web scraps NOS TV EPG information from their site into JSON files",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/JosePedroDias/nos-epg-scrapper.git"
+  },
+  "keywords": [
+    "epg",
+    "nos",
+    "tv",
+    "portugal"
+  ],
+  "author": {
+    "name" : "José Pedro Dias",
+    "email" : "jose.pedro.dias@gmail.com",
+    "url" : "http://josepedrodias.com/"
+  },
   "license": "ISC",
   "dependencies": {
     "async": "^0.9.0",

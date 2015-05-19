@@ -24,26 +24,23 @@ var saveAsJSON = function(fileName) {
 
 
 
-//s.getChannels(log2);
-//s.getChannels(saveAsJSON('cache/channels.json'));
+// STEP 0
+/*fs.mkdir('cache', function(err) {
+    s.getChannels(saveAsJSON('cache/channels.json'));
+});*/
 
 
 
-//s.getChannel('232', log2); // +tvi
-//s.getChannel('232', saveAsJSON('232.json'));
-
-
-
-var channels = JSON.parse( fs.readFileSync('cache/channels.json').toString() );
+// UPDATE STUFF
+//var channels = [];
 //var channels = [{number:'5', name:'RTP 1'}];
-//channels.forEach(function(ch) {
+var channels = JSON.parse( fs.readFileSync('cache/channels.json').toString() );
+
 async.map(channels, function(ch, outerCb) {
     console.log('* ' + ch.name);
     var num = ch.number;
     var dirName = 'cache/' + num;
-    fs.mkdir(dirName, function(err) {
-        //if (err) { return console.error(err); }
-
+    fs.mkdir(dirName, function() {
         s.getChannel(num, function(err, data) {
             if (err) { return console.error(err); }
 
@@ -74,7 +71,6 @@ async.map(channels, function(ch, outerCb) {
             });
         });
     });
-    //
 }, log2);
 
 
