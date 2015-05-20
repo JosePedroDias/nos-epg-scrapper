@@ -1,13 +1,13 @@
 var fs = require('fs');
 
 var async = require('async');
-var swce = require('save-with-correct-extension');
+var judas = require('judas');
 
 var s = require('./index');
 
 
 
-var STEP = 2;
+var STEP = 3;
 
 
 
@@ -16,7 +16,7 @@ var log2 = function(err, o) { if (err) { return console.error(err); } console.lo
 var logOk = function(err, o) { if (err) { return console.error(err); } console.log('OK!'); };
 
 var writeAsJSON = function(fileName, o, cb) {
-    //fs.writeFile(fileName, JSON.stringify(o, null, '  '), cb);
+    //fs.writeFile(fileName, JSON.stringify(o, null, '\t'), cb);
     fs.writeFile(fileName, JSON.stringify(o), cb);
 };
 
@@ -77,7 +77,7 @@ if (STEP === 1) {
                 ch.acronym = data.acronym;
                 ch.logo = data.logo;
 
-                swce(ch.logo, dirName + '/logo.', function(err, localPath) {
+                judas(ch.logo, dirName + '/logo.', function(err, localPath) {
                     if (err) {
                         //return outerCb(err);
                         console.log('Could not determine mime type for ' + ch.logo + ' -> skipping...');
@@ -159,7 +159,7 @@ if (STEP === 2) {
 
                             async.eachLimit(
                                 progs,
-                                4,
+                                2,
                                 function (prog, cb3) {
                                     var progFileName = dirName + '/' + prog.id + '.json';
                                     fs.stat(progFileName, function (err, stat) {
@@ -186,5 +186,58 @@ if (STEP === 2) {
                 });
             });
         })
+    }, logOk);
+}
+
+
+
+
+// DETERMINE CHANNEL GENRES
+if (STEP === 3) {
+    var channels = JSON.parse(fs.readFileSync('cache/channels.json').toString());
+
+    async.eachLimit(channels, 1, function (ch, outerCb) {
+        console.log('* ' + ch.name);
+        var num = ch.number;
+        var dirName = 'cache/channels/' + num;
+
+        fs.readdir(dirName, function (err, daysProgFileNames) {
+            if (err) {
+                return outerCb(err);
+            }
+
+            async.mapLimit(
+                daysProgFileNames,
+                1,
+                function (fn, cb2) {
+                    if (fn === 'info.json' || fn === 'logo.png' || fn === 'logo.jpg') {
+                        return cb2(null);
+                    }
+
+                    var dayFn = dirName + '/' + fn;
+
+                    //console.log('** ' + dayFn);
+                    loadAsJSON(dayFn, cb2);
+                },
+                function (err, daysProgs) {
+                    if (err) {
+                        return outerCb(err);
+                    }
+
+                    daysProgs = daysProgs.filter(function (v) {
+                        return !!v;
+                    });
+
+                    var progs = mergeArrayOfArrays(daysProgs);
+
+                    var histo = s.determineChannelGenre(progs);
+                    var h0 = histo[0];
+                    console.log(JSON.stringify(histo));
+                    //console.log('                                 ', h0.percentage > 0.66 ? h0.genre : 'generico ('+h0.genre+' '+(100*h0.percentage).toFixed(1)+'%)');
+
+                    outerCb(null);
+                }
+            );
+        });
     }, logOk);
 }

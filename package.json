@@ -22,9 +22,9 @@
   "license": "ISC",
   "dependencies": {
     "async": "^0.9.0",
+    "judas": "^1.0.0",
     "moment": "^2.10.3",
     "request": "^2.55.0",
-    "save-with-correct-extension": "^1.0.3",
     "scrap": "^0.1.0",
     "stream-to-buffer": "^0.1.0"
   }

@@ -1,2 +1,3 @@
-* logo URLs always return png but are sometimes jpg -> fix with mime type response
+* assert channel category from its cache programs (ONGOING)
+* create simple http server to serve the EPG
 

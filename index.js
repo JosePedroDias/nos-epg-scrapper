@@ -10,6 +10,14 @@ var PREFIX_PROGRAMS = 'http://www.nos.pt/_layouts/Armstrong/ApplicationPages/EPG
 var PREFIX_IMAGES = 'http://images.nos.pt/';
 
 
+
+var mergeArrayOfArrays = function(arr) {
+    var merged = [];
+    return merged.concat.apply(merged, arr);
+};
+
+
+
 function getChannels(cb) {
     scrap(PREFIX_EPG, function (err, $) {
         if (err) { return cb(err); }
@@ -87,6 +95,8 @@ function getProgramLowLevel(pO, cb) {
     })
 }
 
+
+
 function getProgram(chAcronym, progO, cb) {
     getProgramLowLevel({
         programId: progO.id,
@@ -99,8 +109,37 @@ function getProgram(chAcronym, progO, cb) {
 
 
 
+var _sortByCountDesc = function(a, b) { return b.count - a.count; };
+
+function determineChannelGenre(progs) {
+    var genres = progs.map(function(p) {
+        return p.genre;
+    });
+
+    var total = genres.length;
+
+    var histogram = genres.reduce(function(prev, val) {
+        var n = prev[val] || 0;
+        prev[val] = ++n;
+        return prev;
+    }, {});
+
+    var genreKeys = Object.keys(histogram);
+
+    var arr = genreKeys.map(function(k) {
+        var v = histogram[k];
+        return {genre:k, count:v, percentage:v/total};
+    });
+
+    arr.sort(_sortByCountDesc);
+    return arr;
+}
+
+
+
 module.exports = {
     getChannels: getChannels,
     getChannel: getChannel,
-    getProgram: getProgram
+    getProgram: getProgram,
+    determineChannelGenre: determineChannelGenre
 };
