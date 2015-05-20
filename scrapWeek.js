@@ -99,7 +99,7 @@ if (STEP === 1) {
                         });
 
                         var work = function (o, cb) {
-                            console.log('**' + o.fileName);
+                            console.log('** ' + o.fileName);
                             writeAsJSON(o.fileName, o.obj, cb);
                         };
 
@@ -137,7 +137,7 @@ if (STEP === 2) {
                         daysProgFileNames,
                         1,
                         function (fn, cb2) {
-                            if (fn === 'info.json' || fn === 'logo.png') {
+                            if (fn === 'info.json' || fn === 'logo.png' || fn === 'logo.jpg') {
                                 return cb2(null);
                             }
 
