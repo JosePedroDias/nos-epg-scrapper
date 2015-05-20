@@ -79,12 +79,8 @@ function getProgramLowLevel(pO, cb) {
                     title: d[0],
                     desc: d[1],
                     shot: PREFIX_IMAGES + d[2],
-                    startT: d[3],
-                    endT: d[4],
-                    channel: d[5],
                     startD: d[6],
-                    endD: d[7]/*,
-                    dunno: d[8]*/
+                    endD: d[7]
                 });
             }
             cb(err);

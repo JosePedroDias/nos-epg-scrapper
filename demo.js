@@ -6,14 +6,17 @@ var request = require('request');
 var s = require('./index');
 
 
+var STEP = 2;
+
+
 
 var log2 = function(err, o) { if (err) { return console.error(err); } console.log(o); };
 
 var logOk = function(err, o) { if (err) { return console.error(err); } console.log('OK!'); };
 
 var writeAsJSON = function(fileName, o, cb) {
-    fs.writeFile(fileName, JSON.stringify(o, null, '  '), cb);
-    //fs.writeFile(fileName, JSON.stringify(o), cb);
+    //fs.writeFile(fileName, JSON.stringify(o, null, '  '), cb);
+    fs.writeFile(fileName, JSON.stringify(o), cb);
 };
 
 var loadAsJSON = function(fileName, cb) {
@@ -36,10 +39,15 @@ var saveAsJSON = function(fileName) {
     }
 };
 
+var mergeArrayOfArrays = function(arr) {
+    var merged = [];
+    return merged.concat.apply(merged, arr);
+};
+
 
 
 // STEP 0
-if (false) {
+if (STEP === 0) {
     fs.mkdir('cache', function (err) {
         fs.mkdir('cache/channels', function (err) {
             fs.mkdir('cache/programs', function (err) {
@@ -52,12 +60,10 @@ if (false) {
 
 
 // UPDATE CHANNEL DAYS
-if (false) {
-    //var channels = [];
-    //var channels = [{number:'5', name:'RTP 1'}];
+if (STEP === 1) {
     var channels = JSON.parse(fs.readFileSync('cache/channels.json').toString());
 
-    async.map(channels, function (ch, outerCb) {
+    async.each(channels, function (ch, outerCb) {
         console.log('* ' + ch.name);
         var num = ch.number;
         var dirName = 'cache/channels/' + num;
@@ -94,7 +100,7 @@ if (false) {
                         writeAsJSON(o.fileName, o.obj, cb);
                     };
 
-                    async.map(items, work, outerCb);
+                    async.each(items, work, outerCb);
                 });
             });
         });
@@ -104,67 +110,77 @@ if (false) {
 
 
 // FETCH PROGRAM DETAILS
-if (false) {
-    //var channels = [];
-    //var channels = [{number:'5', name:'RTP 1'}];
+if (STEP === 2) {
     var channels = JSON.parse(fs.readFileSync('cache/channels.json').toString());
 
-    async.map(channels, function (ch, outerCb) {
+    async.eachLimit(channels, 1, function (ch, outerCb) {
         console.log('* ' + ch.name);
         var num = ch.number;
         var dirName = 'cache/programs/' + num;
+        var dirName2 = 'cache/channels/' + num;
         fs.mkdir(dirName, function () {
-            loadAsJSON('cache/channels/' + num + '/info.json', function (err, ch2) {
+            loadAsJSON(dirName2 + '/info.json', function (err, ch2) {
                 if (err) {
                     return outerCb(err);
                 }
 
-                // TODO FOR EACH DAY IN CHANNEL
+                fs.readdir(dirName2, function (err, daysProgFileNames) {
+                    if (err) {
+                        return outerCb(err);
+                    }
 
-                // CHECK IF DIR IN PROGRAMS EXISTS
+                    async.mapLimit(
+                        daysProgFileNames,
+                        1,
+                        function (fn, cb2) {
+                            if (fn === 'info.json' || fn === 'logo.png') {
+                                return cb2(null);
+                            }
 
-                // EXISTS, SKIP
-                // DOESN'T; ADD TO WORKLOAD
+                            var dayFn = dirName2 + '/' + fn;
 
-                /*var items = Object.keys(data.progs).map(function (date) {
-                    return {
-                        fileName: dirName + '/' + date + '.json',
-                        obj: data.progs[date]
-                    };
+                            console.log('** ' + dayFn);
+                            loadAsJSON(dayFn, cb2);
+                        },
+                        function (err, daysProgs) {
+                            if (err) {
+                                return outerCb(err);
+                            }
+
+                            daysProgs = daysProgs.filter(function (v) {
+                                return !!v;
+                            });
+
+                            var progs = mergeArrayOfArrays(daysProgs);
+
+                            async.eachLimit(
+                                progs,
+                                4,
+                                function (prog, cb3) {
+                                    var progFileName = dirName + '/' + prog.id + '.json';
+                                    fs.stat(progFileName, function (err, stat) {
+                                        if (!err && stat.isFile()) {
+                                            console.log('*** ' + progFileName + ' SKIPPED');
+                                            return cb3(null);
+                                        }
+
+                                        console.log('*** ' + progFileName + ' FETCHING...');
+                                        s.getProgram(ch2.acronym, prog, function (err, progData) {
+                                            if (err) {
+                                                return cb3(err);
+                                            }
+
+                                            //console.log('*** ' + progFileName + ' SAVING...');
+                                            writeAsJSON(progFileName, progData, cb3);
+                                        });
+                                    });
+                                },
+                                outerCb
+                            );
+                        }
+                    );
                 });
-
-                var work = function (o, cb) {
-                    console.log('**' + o.fileName);
-                    writeAsJSON(o.fileName, o.obj, cb);
-                };
-
-                async.map(items, work, outerCb);*/
             });
         })
     }, logOk);
-
-
-
-// FETCH PROGRAM DETAILS
-
-if (false) {
-    var acronym7 = "SIC";
-
-    var p82906 = {
-        "id": "82906",
-        "genre": "entretenimento",
-        "title": "Mar Salgado T.1 Ep.212",
-        "startT": "21:30",
-        "endT": "22:30"
-    };
-    //s.getProgram(acronym7, p82906, saveAsJSON('cache/programs/82906.json'));
-
-    var p82924 = {
-        "id": "82924",
-        "genre": "entretenimento",
-        "title": "Mar Salgado T.1 Ep.213",
-        "startT": "22:00",
-        "endT": "22:30"
-    };
-    s.getProgram(acronym7, p82924, saveAsJSON('cache/programs/82924.json'));
 }
