@@ -7,7 +7,7 @@ var s = require('./index');
 
 
 
-var STEP = 3;
+var STEP = 2;
 
 
 
